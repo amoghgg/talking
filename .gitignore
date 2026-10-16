@@ -1,0 +1,25 @@
+# environments / caches
+.venv/
+__pycache__/
+.DS_Store
+
+# personal data: photos, face models, generated images (never published)
+dataset/
+models/
+synth/out/
+
+# private tuning: the exact settings used for the exhibited piece
+live/presets.json
+training/train.env
+training/drop.txt
+training/captions.py
+
+# experiments not part of the published versions
+live/face_bridge.py
+
+# TouchDesigner autosaves / numbered versions (td/talking.toe is the published one)
+td/Backup/
+td/talking.*.toe
+
+# local symlink for an older TD component path
+Documents/
