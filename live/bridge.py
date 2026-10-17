@@ -63,16 +63,21 @@ def main():
     ap.add_argument("--steps", type=int)
     ap.add_argument("--strength", type=float, help="how much of each frame gets repainted")
     ap.add_argument("--lora-weight", type=float)
+    ap.add_argument("--decoder", choices=["tiny", "full"], help="tiny = TAESD (fast, soft), full = SD VAE (sharper, slower)")
     ap.add_argument("--seed", type=int, default=7, help="fixed noise each frame = less flicker")
     ap.add_argument("--dump", action="store_true", help="save the 5th frame's SD input/output for checking")
     args = ap.parse_args()
     for k, v in PRESETS[args.preset].items():
-        if getattr(args, k) is None:
+        if getattr(args, k, None) is None:
             setattr(args, k, v)
+    args.decoder = args.decoder or "tiny"
     print(f"preset '{args.preset}': {args.width}x{args.height}, steps {args.steps}, "
-          f"strength {args.strength}, lora {args.lora_weight}", flush=True)
+          f"strength {args.strength}, lora {args.lora_weight}, decoder {args.decoder}", flush=True)
 
     pipe = load_pipe(args.lora)
+    if args.decoder == "full":
+        from diffusers import AutoencoderKL
+        pipe.vae = AutoencoderKL.from_pretrained("stabilityai/sd-vae-ft-mse", torch_dtype=torch.float16).to("mps")
     if args.lora:
         pipe.set_adapters(["lcm", "face"], adapter_weights=[1.0, args.lora_weight])
     directory = SyphonServerDirectory()

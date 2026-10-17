@@ -1,5 +1,19 @@
 {
   "_note": "Starting points only - copy to presets.json and tune for your face, camera and machine. Width/height must be multiples of 64. LCM runs int(steps * strength) UNet steps, starting from ~strength noise: lower strength keeps more of the camera image, higher lets the face take over.",
-  "detailed": {"width": 512, "height": 320, "steps": 4, "strength": 0.5, "lora_weight": 1.0},
-  "smooth":   {"width": 320, "height": 192, "steps": 2, "strength": 0.5, "lora_weight": 1.0}
+  "detailed": {
+    "width": 512,
+    "height": 320,
+    "steps": 4,
+    "strength": 0.5,
+    "lora_weight": 1.0,
+    "decoder": "tiny"
+  },
+  "smooth": {
+    "width": 320,
+    "height": 192,
+    "steps": 2,
+    "strength": 0.5,
+    "lora_weight": 1.0,
+    "decoder": "tiny"
+  }
 }

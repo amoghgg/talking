@@ -23,3 +23,6 @@ td/talking.*.toe
 
 # local symlink for an older TD component path
 Documents/
+
+# your videos
+recordings/
