@@ -24,14 +24,25 @@ Built on: [TouchDesigner](https://derivative.ca) · [kohya-ss/sd-scripts](https:
 1. **Photos.** About 50 ordinary selfies of me: different places, light, clothes. Junk shots dropped, faces auto-cropped (`training/prepare.py`).
 2. **Captions.** Each photo gets a trigger word (`amoghface`) plus whatever changes between photos (clothes, room, light). Things that make me *me*, like the glasses and curls, are deliberately left out of captions so the trigger word absorbs them.
 3. **Face LoRA.** A small add-on file that teaches Stable Diffusion 1.5 one face, trained in about 15 minutes on a rented GPU (`training/train_runpod.sh`).
-4. **Live loop.** TouchDesigner sends the mirrored webcam over Syphon. `live/bridge.py` repaints each frame *gently*: enough for the face to become mine, not so much that the room, hands and pose are lost. LCM-LoRA makes that take 1–2 diffusion steps instead of 25. The result goes back to TouchDesigner over Syphon.
+4. **Live loop.** TouchDesigner sends the webcam over Syphon. `live/bridge.py` repaints each frame *gently*: enough for the face to become mine, not so much that the room, hands and pose are lost. LCM-LoRA makes that take 1–2 diffusion steps instead of 25. The result goes back to TouchDesigner over Syphon, which mirrors it for the screen (the model sees the camera un-mirrored, the same way it was trained).
 
-Two versions ship:
+Three versions ship:
 
 | | | |
 |---|---|---|
 | **detailed** | `./run_detailed.sh` | slower, more accurate face |
 | **smooth**   | `./run_smooth.sh`   | faster, softer face |
+| **room**     | `./run_room.sh`     | face model trained on full 16:9 frames of the installation room itself |
+
+### The room version (full frame, 16:9)
+
+Instead of square face crops from selfies, the room model is trained on whole 16:9 frames from the same camera, in the same room, under the same light the piece runs in. Background, lighting, body and face all go into training, so the model learns the space as well as the face, and the live output keeps the room's real colours instead of drifting.
+
+1. **Record.** Leave the camera where it will stay for the show. Press `R` in TouchDesigner to record the plain camera (`recordings/raw_<time>.mov`); do several takes in different clothes, hair, expressions, close and far.
+2. **Stills.** `training/frames_from_video.py` scans the takes, keeps the sharpest moment every couple of seconds, and drops near-duplicates. The stills stay full-frame 16:9 (no face crop).
+3. **Captions.** Only what changes between stills: outfit, hair or hat, gesture, framing (close-up / medium / full body). The room, the light and the glasses are never captioned, so the trigger word absorbs them.
+4. **Train** at 16:9 with bucketing, e.g. `RESOLUTION=768,448` in `train.env`.
+5. **Run** at 16:9 too (512×256 worked far better than smaller sizes for a model trained this way). Don't move the camera or change the light afterwards: the model learned that exact view.
 
 ## Run it yourself
 
@@ -50,6 +61,11 @@ mkdir -p models && curl -L -o models/face_detection_yunet_2023mar.onnx \
 
 # 3. live: open td/talking.toe in TouchDesigner, then
 ./run_smooth.sh --lora models/lora/myface.safetensors --prompt "photo of myface, a person"
+
+# room version: stills from your own camera recordings instead of photos
+./.venv/bin/python training/frames_from_video.py recordings/raw_*.mov --out frames/room --min-diff 0.07
+#    caption them, train with RESOLUTION=768,448, then
+./run_room.sh --lora models/lora/myroom.safetensors --prompt "photo of myroom, a person"
 ```
 
 The live presets in `live/presets.example.json` and the training settings in `training/train.example.env` are **generic starting points, not the values used in my piece**. Copy them to `presets.json` / `train.env` and tune them: `live/tune.py` and `live/bench.py` exist exactly for that.

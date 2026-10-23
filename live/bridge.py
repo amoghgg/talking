@@ -54,7 +54,7 @@ def to_rgb(rgba: np.ndarray, bgra: bool, width: int, height: int) -> Image.Image
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--preset", choices=PRESETS, default="detailed")
-    ap.add_argument("--lora", default=DEFAULT_LORA, help="face LoRA .safetensors ('' for the base model)")
+    ap.add_argument("--lora", help="face LoRA .safetensors ('' for the base model); a preset may set its own")
     ap.add_argument("--prompt", default="photo of amoghface, a man")
     # SD needs both sides divisible by 64. Gentle repaint like the reference: keeps
     # clothes/hands/room, only the face identity drifts.
@@ -71,8 +71,9 @@ def main():
         if getattr(args, k, None) is None:
             setattr(args, k, v)
     args.decoder = args.decoder or "tiny"
+    args.lora = DEFAULT_LORA if args.lora is None else args.lora
     print(f"preset '{args.preset}': {args.width}x{args.height}, steps {args.steps}, "
-          f"strength {args.strength}, lora {args.lora_weight}, decoder {args.decoder}", flush=True)
+          f"strength {args.strength}, lora {args.lora} @ {args.lora_weight}, decoder {args.decoder}", flush=True)
 
     pipe = load_pipe(args.lora)
     if args.decoder == "full":

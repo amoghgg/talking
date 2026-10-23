@@ -11,6 +11,7 @@ synth/out/
 # private tuning: the exact settings used for the exhibited piece
 live/presets.json
 training/train.env
+training/train_room.env
 training/drop.txt
 training/captions.py
 
@@ -26,3 +27,6 @@ Documents/
 
 # your videos
 recordings/
+
+# stills pulled from videos (your face)
+frames/

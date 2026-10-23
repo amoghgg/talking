@@ -15,5 +15,13 @@
     "strength": 0.5,
     "lora_weight": 1.0,
     "decoder": "tiny"
+  },
+  "room": {
+    "width": 512,
+    "height": 256,
+    "steps": 2,
+    "strength": 0.4,
+    "lora_weight": 1.0,
+    "decoder": "tiny"
   }
 }
